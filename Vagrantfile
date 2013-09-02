@@ -13,13 +13,13 @@ Vagrant.configure("2") do |config|
   end
 
   
-  config.vm.synced_folder "./Projects", "/var/www", id: "vagrant-root" 
+  config.vm.synced_folder "./Projects", "/var/www", id: "vagrant-root", :nfs => true 
   config.vm.synced_folder "../../Dropbox", "/var/dropbox", id: "dropbox" 
   config.vm.provision :shell, :inline =>
     "if [[ ! -f /apt-get-run ]]; then sudo apt-get update && sudo touch /apt-get-run; fi"
 
 
-  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=mypass
+  config.vm.provision :shell, :inline => 'echo -e "mysql_root_password=php4225
 controluser_password=awesome" > /etc/phpmyadmin.facts;'
 
   config.vm.provision :puppet do |puppet|

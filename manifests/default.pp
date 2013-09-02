@@ -40,7 +40,9 @@ package { [
     'build-essential',
     'vim',
     'curl',
-    'git-core'
+    'git-core',
+    'nfs-common',
+    'portmap'
   ]:
   ensure  => 'installed',
 }
@@ -62,6 +64,47 @@ nginx::resource::vhost { 'perso.dev':
   try_files    => ['$uri', '$uri/', '/index.php?$args'],
 }
 
+nginx::resource::vhost { 'ace.dev':
+  ensure       => present,
+  server_name  => [
+    'ace.dev'  ],
+  listen_port  => 80,
+  index_files  => [
+    'index.html',
+    'index.htm',
+    'index.php'
+  ],
+  www_root     => '/var/www/acesolutions/web',
+  try_files    => ['$uri', '$uri/', '/index.php?$args'],
+}
+
+nginx::resource::vhost { 'kayofr.dev':
+  ensure       => present,
+  server_name  => [
+    'kayofr.dev'  ],
+  listen_port  => 80,
+  index_files  => [
+    'index.html',
+    'index.htm',
+    'index.php'
+  ],
+  www_root     => '/var/www/kayo.fr/web',
+  try_files    => ['$uri', '$uri/', '/index.php?$args'],
+}
+
+nginx::resource::vhost { 'powder.dev':
+  ensure       => present,
+  server_name  => [
+    'powder.dev'  ],
+  listen_port  => 80,
+  index_files  => [
+    'index.html',
+    'index.htm',
+    'index.php'
+  ],
+  www_root     => '/var/www/powderconcept/web',
+  try_files    => ['$uri', '$uri/', '/index.php?$args'],
+}
 
 $path_translated = 'PATH_TRANSLATED $document_root$fastcgi_path_info'
 $script_filename = 'SCRIPT_FILENAME $document_root$fastcgi_script_name'
@@ -73,6 +116,63 @@ nginx::resource::location { 'perso.dev-php':
   proxy               => undef,
   try_files           => ['$uri', '$uri/', '/index.php?$args'],
   www_root            => '/var/www/',
+  location_cfg_append => {
+    'fastcgi_split_path_info' => '^(.+\.php)(/.+)$',
+    'fastcgi_param'           => 'PATH_INFO $fastcgi_path_info',
+    'fastcgi_param '          => $path_translated,
+    'fastcgi_param  '         => $script_filename,
+    'fastcgi_pass'            => 'unix:/var/run/php5-fpm.sock',
+    'fastcgi_index'           => 'index.php',
+    'include'                 => 'fastcgi_params'
+  },
+  notify              => Class['nginx::service'],
+}
+
+nginx::resource::location { 'ace.dev-php':
+  ensure              => 'present',
+  vhost               => 'ace.dev',
+  location            => '~ \.php$',
+  proxy               => undef,
+  try_files           => ['$uri', '$uri/', '/index.php?$args'],
+  www_root            => '/var/www/acesolutions/web',
+  location_cfg_append => {
+    'fastcgi_split_path_info' => '^(.+\.php)(/.+)$',
+    'fastcgi_param'           => 'PATH_INFO $fastcgi_path_info',
+    'fastcgi_param '          => $path_translated,
+    'fastcgi_param  '         => $script_filename,
+    'fastcgi_pass'            => 'unix:/var/run/php5-fpm.sock',
+    'fastcgi_index'           => 'index.php',
+    'include'                 => 'fastcgi_params'
+  },
+  notify              => Class['nginx::service'],
+}
+
+nginx::resource::location { 'kayofr.dev-php':
+  ensure              => 'present',
+  vhost               => 'kayofr.dev',
+  location            => '~ \.php$',
+  proxy               => undef,
+  try_files           => ['$uri', '$uri/', '/index.php?$args'],
+  www_root            => '/var/www/kayo.fr/web',
+  location_cfg_append => {
+    'fastcgi_split_path_info' => '^(.+\.php)(/.+)$',
+    'fastcgi_param'           => 'PATH_INFO $fastcgi_path_info',
+    'fastcgi_param '          => $path_translated,
+    'fastcgi_param  '         => $script_filename,
+    'fastcgi_pass'            => 'unix:/var/run/php5-fpm.sock',
+    'fastcgi_index'           => 'index.php',
+    'include'                 => 'fastcgi_params'
+  },
+  notify              => Class['nginx::service'],
+}
+
+nginx::resource::location { 'powder.dev-php':
+  ensure              => 'present',
+  vhost               => 'powder.dev',
+  location            => '~ \.php$',
+  proxy               => undef,
+  try_files           => ['$uri', '$uri/', '/index.php?$args'],
+  www_root            => '/var/www/powderconcept/web',
   location_cfg_append => {
     'fastcgi_split_path_info' => '^(.+\.php)(/.+)$',
     'fastcgi_param'           => 'PATH_INFO $fastcgi_path_info',
@@ -214,7 +314,7 @@ puphpet::ini { 'custom':
 
 
 class { 'mysql::server':
-  config_hash   => { 'root_password' => 'mypass' }
+  config_hash   => { 'root_password' => 'php4225' }
 }
 
 
@@ -251,4 +351,3 @@ nginx::resource::location { "phpmyadmin-php":
   notify              => Class['nginx::service'],
   require             => Nginx::Resource::Vhost['phpmyadmin'],
 }
-

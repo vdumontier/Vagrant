@@ -26,7 +26,7 @@ class nginx::params {
   $nx_names_hash_bucket_size  = 64
   $nx_multi_accept            = off
   $nx_events_use         = false # One of [kqueue|rtsig|epoll|/dev/poll|select|poll|eventport] or false to use OS default
-  $nx_sendfile                = on
+  $nx_sendfile                = off
   $nx_keepalive_timeout       = 65
   $nx_tcp_nodelay             = on
   $nx_gzip                    = on
